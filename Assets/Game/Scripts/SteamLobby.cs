@@ -1,3 +1,4 @@
+using Edgegap;
 using Steamworks;
 using System.Collections.Generic;
 using System.Text;
@@ -40,7 +41,9 @@ namespace Game
 		{
 			m_LobbyChatMsg = Callback<LobbyChatMsg_t>.Create(OnLobbyChatMsg);
 			m_LobbyStatusUpdate = Callback<LobbyChatUpdate_t>.Create(OnLobbyStatusUpdate);
-			inputField.onSubmit.AddListener(SendChatMessage);		
+			inputField.onSubmit.AddListener(SendChatMessage);
+
+
 		}
 
 		private void OnDestroy()
@@ -119,6 +122,8 @@ namespace Game
 
 		private void OnLobbyStatusUpdate(LobbyChatUpdate_t callback)
 		{
+			Debug.Log( SteamMatchmaking.GetLobbyData(steamManager.ActiveLobbyId, "started"));
+
 			// Make sure that the callback is meant for this lobby
 			if (callback.m_ulSteamIDLobby != steamManager.ActiveLobbyId.m_SteamID) return;
 
@@ -220,7 +225,7 @@ namespace Game
 		public void StartGame()
 		{
 			SteamMatchmaking.SetLobbyJoinable(steamManager.ActiveLobbyId, false);
-			NetManager.singleton.StartHost();
+			NetManager.singleton.ServerChangeScene("Game");
 		}
 	}
 }

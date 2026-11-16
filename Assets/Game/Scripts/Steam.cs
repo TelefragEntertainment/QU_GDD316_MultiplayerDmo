@@ -1,3 +1,4 @@
+using Edgegap;
 using Mirror;
 using Steamworks;
 using System;
@@ -159,6 +160,9 @@ namespace Game
 			// Add custom "bobcat" data to find Bobcat servers
 			SteamMatchmaking.SetLobbyData(activeLobbyId, "bobcat", "Yes");
 
+			// Mirror start hosting
+			NetManager.singleton.StartHost();
+
 			OnLobbyJoin?.Invoke();
 		}
 
@@ -193,6 +197,9 @@ namespace Game
 
 			createLobbyButton.interactable = false;
 			OnLobbyJoin?.Invoke();
+
+			NetManager.singleton.networkAddress = hostAddress;
+			NetManager.singleton.StartClient();
 		}
 
 		private void HandleLobbyJoin()
