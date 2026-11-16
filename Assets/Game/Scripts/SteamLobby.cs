@@ -1,12 +1,9 @@
-using Mirror.BouncyCastle.Tls;
 using Steamworks;
 using System.Collections.Generic;
-using System.Data;
 using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 namespace Game
 {
@@ -26,6 +23,11 @@ namespace Game
 		[Header("Members")]
 		[SerializeField] private TMP_Text membersListText;
 		private string lobbyName;
+
+		[Header("Ready")]
+		[SerializeField] private Button readyButton;
+		[SerializeField] private Button startButton;
+		private bool isReady;
 
 		private void Awake()
 		{
@@ -176,12 +178,49 @@ namespace Game
 		{
 			int memberCount = SteamMatchmaking.GetNumLobbyMembers(steamManager.ActiveLobbyId);
 			membersListText.text = $"<color=orange><size=+10>{lobbyName}</size></color>\n\n";
+			bool allReady = true;
 			for (int i = 0; i < memberCount; i++)
 			{
 				CSteamID memberID = SteamMatchmaking.GetLobbyMemberByIndex(steamManager.ActiveLobbyId, i);
 				string memberName = SteamFriends.GetFriendPersonaName(memberID);
-				membersListText.text += $"  {i + 1}. {memberName}\n";
+				string ready = SteamMatchmaking.GetLobbyMemberData(steamManager.ActiveLobbyId, memberID, "ready");
+				string readyStr = (ready == "Yes") ? "<color=green><sup>READY</sup></color>" : "";
+				membersListText.text += $"  {i + 1}. {memberName}  {readyStr}\n";
+				if (ready != "Yes") allReady = false;
 			}
+
+			// Enable start button
+			if (allReady)
+			{
+				if(SteamMatchmaking.GetLobbyOwner(steamManager.ActiveLobbyId) == SteamUser.GetSteamID())
+				{
+					startButton.interactable = true;
+				}
+			}
+			else
+			{
+				startButton.interactable = false;
+			}
+		}
+
+		public void ToggleReady()
+		{
+			isReady = !isReady;
+			readyButton.interactable = false;
+			SteamMatchmaking.SetLobbyMemberData(steamManager.ActiveLobbyId, "ready", isReady ? "Yes" : "No");
+			UpdateMemberStatus();
+			Invoke(nameof(ResetReady),0.5f);
+		}
+
+		private void ResetReady()
+		{
+			readyButton.interactable = true;
+		}
+
+		public void StartGame()
+		{
+			SteamMatchmaking.SetLobbyJoinable(steamManager.ActiveLobbyId, false);
+			NetManager.singleton.StartHost();
 		}
 	}
 }
