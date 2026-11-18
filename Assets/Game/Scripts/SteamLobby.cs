@@ -1,5 +1,6 @@
 using Edgegap;
 using Steamworks;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
@@ -226,6 +227,7 @@ namespace Game
 		{
 			SteamMatchmaking.SetLobbyJoinable(steamManager.ActiveLobbyId, false);
 			NetManager.singleton.ServerChangeScene("Game");
+			gameObject.SetActive(false);
 		}
 	}
 }
